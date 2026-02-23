@@ -51,7 +51,7 @@ public class TaskRepository {
         return jdbcTemplate.query(sql, taskRowMapper);
     }
 
-    public void update(Task task) {
+    public Task update(Task task) {
         String sql = "UPDATE tarefas SET descricao = ?, status = ?, data_limite = ? WHERE id = ?";
 
         jdbcTemplate.update(sql,
@@ -60,6 +60,8 @@ public class TaskRepository {
                 task.getDateLimit(),
                 task.getId() // The ID entered last to match the WHERE clause
         );
+
+        return task;
     }
 
     public void delete(Long id) {
