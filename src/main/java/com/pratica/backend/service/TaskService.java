@@ -47,14 +47,41 @@ public class TaskService {
     }
 
     public TaskResponseDTO update(Long id, TaskRequestDTO dto) {
-        getTaskEntityById(id);
-
+        Task taskExistente = getTaskEntityById(id);
         Task taskToUpdate = dto.toEntity();
-        //joins the ID with the request
-        taskToUpdate.setId(id);
+        taskToUpdate.setId(id); //joins the ID with the request
 
+        if (dto.status() == null) {
+            taskToUpdate.setStatus(taskExistente.getStatus());
+        }
         Task updatedTask = taskRepository.update(taskToUpdate);
 
+        return TaskResponseDTO.fromEntity(updatedTask);
+    }
+
+    public TaskResponseDTO updateParcial(Long id, TaskRequestDTO dto) {
+        // 1. Pegamos a tarefa original que já está salva no banco
+        Task taskExistente = getTaskEntityById(id);
+
+        // 2. O Bisturi: Verificamos campo por campo do pacote da internet (dto).
+        // Só aplicamos a mudança na taskExistente se o campo NÃO for nulo.
+        if (dto.description() != null) {
+            taskExistente.setDescription(dto.description());
+        }
+
+        if (dto.status() != null) {
+            taskExistente.setStatus(dto.status());
+        }
+
+        if (dto.dateLimit() != null) {
+            taskExistente.setDateLimit(dto.dateLimit());
+        }
+
+        // 3. Mandamos o repositório atualizar a tarefa
+        // (ela agora é uma mistura dos dados velhos com as alterações novas)
+        Task updatedTask = taskRepository.update(taskExistente);
+
+        // 4. Devolvemos a resposta
         return TaskResponseDTO.fromEntity(updatedTask);
     }
 

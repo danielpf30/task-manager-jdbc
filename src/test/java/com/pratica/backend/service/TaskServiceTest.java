@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 // Tell JUnit to connect the mokito to this class.
 @ExtendWith(MockitoExtension.class)
-class TaskServiceTest {
+public class TaskServiceTest {
 
     // Creates a mock database.
     @Mock
