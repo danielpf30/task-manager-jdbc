@@ -1,91 +1,121 @@
+#  To-Do List API – Java 21 + Spring Boot
+
+API RESTful para gerenciamento de tarefas desenvolvida com Java 21 e Spring Boot 3, projetada com foco em arquitetura limpa, validação rigorosa e estratégia sólida de testes.
+
 ##  Visão Geral
+A API gerencia o ciclo completo de vida de tarefas diárias, oferecendo:
 
-###  O que é?
-Uma API RESTful para gerenciamento de tarefas (To-Do List), desenvolvida em Java com Spring Boot para servir como o back-end (motor) de aplicações web ou mobile.
+* ✔ **CRUD completo** (POST, GET, PUT, PATCH, DELETE)
+* ✔ **Atualização parcial** com PATCH
+* ✔ **Validação automática** de dados com retorno HTTP 400
+* ✔ **Status inteligente** com valor padrão (PENDENTE)
+* ✔ **Persistência** com controle total das queries SQL
 
-###  O que faz?
-Gerencia o ciclo de vida completo de uma tarefa diária. Suas principais funções incluem:
-* **CRUD Completo:** Criar, listar, atualizar (total via `PUT` ou parcial via `PATCH`) e deletar tarefas.
-* **Validação de Dados:** Bloqueia automaticamente requisições inválidas (ex: datas no passado ou descrições vazias) devolvendo mensagens claras (Erro 400).
-* **Gestão de Status:** Processa o status da tarefa de forma inteligente (Pendente, Em Progresso, Concluída), assumindo "Pendente" por padrão quando omitido.
+##  Arquitetura
+A aplicação segue uma Arquitetura em Camadas, garantindo separação clara de responsabilidades:
 
-###  Como faz?
-A aplicação utiliza uma **Arquitetura em Camadas** (Controller, Service, Repository) focada em controle e performance:
-* **Proteção na Borda:** A internet não toca no banco de dados. A comunicação é feita apenas com **DTOs** (Data Transfer Objects), que são blindados pelo `Jakarta Validation` logo na entrada da API.
-* **Persistência com JdbcTemplate:** Diferente de projetos acoplados a ORMs (como JPA/Hibernate), a comunicação com o **PostgreSQL** é feita de forma manual e otimizada usando o Spring `JdbcTemplate`, garantindo controle absoluto sobre as queries SQL.
+`Controller` → `Service` → `Repository` → `PostgreSQL`
 
-* ##  Tecnologias Utilizadas
 
-* **Back-end:** Java (JDK 21), Spring Boot 3 (Web, Validation, JDBC).
-* **Banco de Dados:** PostgreSQL.
-* **Infraestrutura:** Docker (Containerização do banco de dados).
-* **Testes:** JUnit 5, Mockito, Spring Boot Test.
-* **Utilitários:** Lombok (Redução de boilerplate corporativo), Jackson (Serialização inteligente de JSON).
 
-##  Estratégia de Testes
+###  Proteção na Borda (DTO)
+Toda comunicação externa ocorre via DTOs. A validação é realizada com **Jakarta Validation**, e as Entidades de domínio não são expostas diretamente. Isso garante:
+*  Contrato de API limpo
+*  Validação na entrada da aplicação
+*  Desacoplamento entre transporte e domínio
 
-A estabilidade da aplicação foi garantida aplicando a pirâmide de testes, separando as responsabilidades para que os testes rodem em milissegundos:
+###  Estratégia de Persistência
+Ao invés de utilizar ORM (como JPA/Hibernate), o projeto utiliza:
+* Spring `JdbcTemplate`
+* Queries SQL manuais
+* Controle explícito da comunicação com o banco
+* Banco de dados: **PostgreSQL** (Dockerizado)
 
-* **Testes Fatiados (Sliced Tests):** Utilização da anotação `@WebMvcTest` nos Controllers. Isso permite testar exclusivamente a camada de internet (rotas, validações do `@Valid`, conversão de JSON para DTO e Status HTTP) isolada do banco de dados, tornando os testes extremamente rápidos.
-* **Testes Unitários:** Focados na camada de `Service` (Regras de Negócio). O comportamento da lógica (como o "bisturi" do método PATCH) é validado utilizando o **Mockito** para criar "dublês" (Mocks) do banco de dados.
-* **Testes de Integração (Repository):** Focados na camada de persistência. Como a aplicação utiliza `JdbcTemplate`, esses testes validam a execução correta das queries SQL manuais e o mapeamento dos dados extraídos do banco de dados para os objetos Java, garantindo a integridade total da comunicação com o PostgreSQL.
+##  Estratégia de Testes – Pirâmide Aplicada
+A estabilidade da aplicação é garantida por uma estrutura clara de testes automatizados:
 
+🔹 **Controller – Testes Fatiados**
+* **Ferramenta:** `@WebMvcTest`
+* **Foco:** Rotas, Status HTTP e conversão JSON/DTO.
+* **Segurança:** Validação de entrada com `@Valid`.
+* **Performance:** Banco de dados isolado (rodando em milissegundos).
+
+🔹 **Service – Testes Unitários**
+* **Ferramentas:** JUnit 5 + Mockito
+* **Foco:** Regras de negócio e definição de status padrão.
+* **Comportamento:** Lógica de atualização parcial (PATCH).
+* **Isolamento:** Camada de banco de dados 100% mockada.
+
+🔹 **Repository – Testes de Integração**
+* **Ferramentas:** Spring Boot Test + Testcontainers (Docker)
+* **Foco:** Execução real e exata das queries SQL.
+* **Mapeamento:** Conversão de `ResultSet` para objetos Java.
+* **Ambiente:** Testado diretamente contra o PostgreSQL real.
+  
 ##  Infraestrutura com Docker
+O PostgreSQL é executado em container Docker, mapeado para a porta externa **5433**, evitando conflitos com instalações locais.
 
-Para garantir que o projeto rode em qualquer máquina sem "dores de cabeça" com instalações locais, o banco de dados PostgreSQL foi isolado utilizando **Docker**. O container deste projeto foi mapeado para a porta externa **5433**, evitando qualquer colisão de portas.
+##  Tecnologias Utilizadas
+* Java 21
+* Spring Boot 3 (Web)
+* **Spring JdbcTemplate** (Persistência de dados com controle nativo de SQL)
+* **Jakarta Validation** (Blindagem e validação de DTOs na borda da API)
+* PostgreSQL
+* Docker
+* JUnit 5 & Mockito
+* Lombok & Jackson
 
-##  Como Executar e Testar a Aplicação
+---
 
-### Pré-requisitos
-Antes de começar, certifique-se de ter instalado em sua máquina:
-* **Java JDK 21** (ou superior)
-* **Maven**
-* **Docker** (Para rodar o banco de dados sem precisar instalar o PostgreSQL localmente)
+##  Como Executar o Projeto
 
-### Passo 1: Clonar o Repositório
-Abra o seu terminal e baixe o código fonte do projeto:
+### 🔹 Pré-requisitos
+* Java 21 ou superior
+* Maven
+* Docker
+
+### 1️⃣ Clonar o Repositório
 ```bash
-git clone [https://github.com/SEU_USUARIO/NOME_DO_REPOSITORIO.git](https://github.com/SEU_USUARIO/NOME_DO_REPOSITORIO.git)
+git clone https://github.com/SEU_USUARIO/NOME_DO_REPOSITORIO.git
 cd NOME_DO_REPOSITORIO
 
-Passo 2: Subir o Banco de Dados (Docker)
-Para evitar conflitos com instalações locais do PostgreSQL (que geralmente ocupam a porta 5432), o container deste projeto foi mapeado para a porta externa 5433. Execute o comando abaixo no terminal para instanciar o banco:
-
+2️⃣ Subir o Banco de Dados (Docker)
 Bash
 docker compose up -d
-
-Passo 3: Configurar o Spring Boot
-Verifique se o arquivo application.properties está apontando corretamente para o container que acabou de criar. As configurações devem estar assim:
-
+3️⃣ Verificar application.properties
 Properties
-spring.application.name=To-Do-List
 spring.datasource.url=jdbc:postgresql://localhost:5433/db_tasks
 spring.datasource.username=admin
 spring.datasource.password=admin
-spring.datasource.driver-class-name=org.postgresql.Driver
+4️⃣ Iniciar a Aplicação
+Bash
+mvn spring-boot:run
+A API estará disponível em: http://localhost:8080/tasks
 
-Passo 4: Iniciar a API
-Com o banco de dados rodando, você pode iniciar o servidor do Spring Boot. Na raiz do projeto.
-
-Passo 5: Testar as Rotas (Postman / Insomnia)
-Com a API no ar, você pode realizar requisições para a URL base http://localhost:8080/tasks.
-
-Exemplo 1: Criando uma tarefa (POST)
+5️⃣ Executar os Testes
+Bash
+mvn test
+🔎 Exemplos de Uso da API
+➕ Criar Tarefa (POST)
+POST http://localhost:8080/tasks
 
 JSON
-// POST http://localhost:8080/tasks
 {
-  "description": "Testing the project",
+  "description": "Testando o projeto",
   "status": "Em Progresso",
-  "dateLimit": "2026-02-28"
+  "dateLimit": "2026-03-02"
 }
-(O sistema possui validações ativas. Se enviar uma data no passado ou omitir a descrição, a API retornará o Status 400 Bad Request).
+(Caso a descrição esteja vazia ou a data seja anterior ao dia atual: HTTP 400 - Bad Request)
 
-Exemplo 2: Atualização Parcial com (PATCH)
+✏ Atualização Parcial (PATCH)
+PATCH http://localhost:8080/tasks/1
 
 JSON
-// PATCH http://localhost:8080/tasks/1
 {
   "status": "Concluída"
 }
-(Neste exemplo, apenas o status da tarefa de ID 1 será alterado. A descrição original e a data limite permanecerão intactas no banco de dados).
+(Apenas os campos enviados são alterados. Os demais permanecem inalterados no banco de dados).
+
+ Objetivo do Projeto
+O foco deste projeto não foi apenas “fazer funcionar”, mas construir uma API:
+ Sustentável | Testável | Performática | Segura | Arquiteturalmente organizada
