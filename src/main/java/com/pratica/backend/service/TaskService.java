@@ -1,5 +1,6 @@
 package com.pratica.backend.service;
 
+import com.pratica.backend.DTOs.TaskPatchDTO;
 import com.pratica.backend.DTOs.TaskRequestDTO;
 import com.pratica.backend.DTOs.TaskResponseDTO;
 import com.pratica.backend.model.Status;
@@ -59,12 +60,9 @@ public class TaskService {
         return TaskResponseDTO.fromEntity(updatedTask);
     }
 
-    public TaskResponseDTO updateParcial(Long id, TaskRequestDTO dto) {
-        // 1. Pegamos a tarefa original que já está salva no banco
+    public TaskResponseDTO updateParcial(Long id, TaskPatchDTO dto) {
         Task taskExistente = getTaskEntityById(id);
 
-        // 2. O Bisturi: Verificamos campo por campo do pacote da internet (dto).
-        // Só aplicamos a mudança na taskExistente se o campo NÃO for nulo.
         if (dto.description() != null) {
             taskExistente.setDescription(dto.description());
         }
@@ -77,11 +75,8 @@ public class TaskService {
             taskExistente.setDateLimit(dto.dateLimit());
         }
 
-        // 3. Mandamos o repositório atualizar a tarefa
-        // (ela agora é uma mistura dos dados velhos com as alterações novas)
         Task updatedTask = taskRepository.update(taskExistente);
 
-        // 4. Devolvemos a resposta
         return TaskResponseDTO.fromEntity(updatedTask);
     }
 
