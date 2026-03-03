@@ -1,5 +1,6 @@
 package com.pratica.backend.controller;
 
+import com.pratica.backend.DTOs.TaskPatchDTO;
 import com.pratica.backend.DTOs.TaskRequestDTO;
 import com.pratica.backend.DTOs.TaskResponseDTO;
 import com.pratica.backend.service.TaskService;
@@ -34,8 +35,10 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<TaskResponseDTO> updateParcial(@PathVariable Long id, @RequestBody TaskRequestDTO dto) {
-        // Sem o @Valid, o Spring deixa entrar um JSON só com o "status", sem reclamar da data ou descrição nulas!
+    public ResponseEntity<TaskResponseDTO> updateParcial(
+            @PathVariable Long id,
+            @Valid @RequestBody TaskPatchDTO dto) {
+
         return ResponseEntity.ok(taskService.updateParcial(id, dto));
     }
 
