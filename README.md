@@ -76,8 +76,7 @@ O PostgreSQL é executado em container Docker, mapeado para a porta externa **54
 
 ### 1️⃣ Clonar o Repositório
 ```bash
-git clone https://github.com/SEU_USUARIO/NOME_DO_REPOSITORIO.git
-cd NOME_DO_REPOSITORIO
+git clone https://github.com/danielpf30/task-manager-jdbc.git
 
 2️⃣ Subir o Banco de Dados (Docker)
 Bash
