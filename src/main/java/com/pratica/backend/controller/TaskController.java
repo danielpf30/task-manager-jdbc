@@ -35,7 +35,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<TaskResponseDTO> updateParcial(
+    public ResponseEntity<TaskResponseDTO> updatePartial(
             @PathVariable Long id,
             @Valid @RequestBody TaskPatchDTO dto) {
 
